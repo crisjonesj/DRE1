@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DRE Executiva - Sistema Completo</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary-blue: #005795;
+            --secondary-blue: #0078c8;
+            --light-blue: #e8f2fc;
+            --accent-blue: #4a9ce8;
+            --success: #00a86b;
+            --warning: #ff9800;
+            --danger: #e53935;
+            --gray-light: #f5f7fa;
+            --gray-medium: #e1e8f0;
+            --gray-dark: #333;
+            --shadow: 0 10px 30px rgba(0, 87, 149, 0.08);
+            --radius: 16px;
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f9ff 0%, #e8f2fc 100%);
+            color: var(--gray-dark);
+            min-height: 100vh;
+        }
+        
+        /* ========== MODAL DE CONTROLE ========== */
+        .control-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+        
+        .control-container {
+            background: white;
+            padding: 40px;
+            border-radius: var(--radius);
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .control-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--light-blue);
+            padding-bottom: 15px;
+        }
+        
+        .control-tab {
+            background: var(--light-blue);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            color: var(--primary-blue);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .control-tab.active {
+            background: var(--primary-blue);
+            color: white;
+        }
+        
+        .control-tab:hover {
+            transform: translateY(-2px);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .tab-title {
+            color: var(--primary-blue);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .upload-area {
+            border: 3px dashed var(--accent-blue);
+            border-radius: var(--radius);
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            background: var(--light-blue);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            background: #e0edff;
+            transform: translateY(-3px);
+        }
+        
+        .upload-icon {
+            font-size: 60px;
+            color: var(--primary-blue);
+            margin-bottom: 20px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .sync-section {
+            background: #fff9e6;
+            padding: 25px;
+            border-radius: var(--radius);
+            margin: 25px 0;
+        }
+        
+        .sync-code {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: monospace;
+            word-break: break-all;
+            border: 2px solid var(--light-blue);
+        }
+        
+        .sync-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            justify-content: center;
+        }
+        
+        .btn-primary {
+            background: var(--primary-blue);
+            color: white;
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        /* ========== DASHBOARD ========== */
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 25px;
+            padding: 20px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            transition: var(--transition);
+            border: 1px solid var(--gray-medium);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 87, 149, 0.12);
+        }
+        
+        .header-card {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            color: white;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-text h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .header-text p {
+            font-size: 16px;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+        
+        .control-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .control-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+        }
+        
+        /* INFO CARDS */
+        .info-grid {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        
+        .info-card {
+            text-align: center;
+            padding: 25px 15px;
+        }
+        
+        .info-icon {
+            font-size: 28px;
+            color: var(--primary-blue);
+            margin-bottom: 15px;
+            background: var(--light-blue);
+            width: 60px;
+            height: 60px;
+            line-height: 60px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+        }
+        
+        .info-card h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-card .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 5px;
+        }
+        
+        .info-card .subtitle {
+            font-size: 12px;
+            color: #888;
+        }
+        
+        /* DRE TABLE */
+        .dre-card {
+            height: fit-content;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-blue);
+        }
+        
+        .card-header h2 {
+            color: var(--primary-blue);
+            font-size: 22px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-header h2 i {
+            color: var(--accent-blue);
+        }
+        
+        .period-selector {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .period-btn {
+            background: var(--light-blue);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            color: var(--primary-blue);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .period-btn:hover {
+            background: var(--accent-blue);
+            color: white;
+        }
+        
+        .period-btn.active {
+            background: var(--primary-blue);
+            color: white;
+        }
+        
+        .dre-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        
+        .dre-table tbody tr {
+            transition: var(--transition);
+        }
+        
+        .dre-table tbody tr:hover {
+            background-color: #f9fbff;
+        }
+        
+        .dre-table td {
+            padding: 18px 15px;
+            border-bottom: 1px solid #eee;
+            font-size: 15px;
+        }
+        
+        .category {
+            font-weight: 700;
+            color: var(--primary-blue);
+            background: linear-gradient(to right, #f0f7ff, transparent);
+        }
+        
+        .subcategory {
+            padding-left: 30px !important;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .value-cell {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--gray-dark);
+            min-width: 140px;
+        }
+        
+        .editable-value {
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: var(--transition);
+            display: inline-block;
+            min-width: 120px;
+            background-color: #fff9e6 !important;
+        }
+        
+        .editable-value:hover {
+            background-color: var(--light-blue) !important;
+            transform: scale(1.05);
+        }
+        
+        .calculated-value {
+            color: var(--primary-blue);
+            font-weight: 800;
+        }
+        
+        .positive {
+            color: var(--success) !important;
+        }
+        
+        .negative {
+            color: var(--danger) !important;
+        }
+        
+        .total-line {
+            background-color: var(--light-blue);
+            font-weight: 800;
+            color: var(--primary-blue);
+            border-top: 2px solid var(--accent-blue);
+            border-bottom: 2px solid var(--accent-blue);
+        }
+        
+        .final-result {
+            background: linear-gradient(to right, var(--primary-blue), var(--secondary-blue));
+            color: white;
+            font-weight: 800;
+            font-size: 16px;
+        }
+        
+        .final-result .value-cell {
+            color: white !important;
+        }
+        
+        /* CHARTS */
+        .charts-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .chart-card {
+            padding: 25px;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+        }
+        
+        /* MARGINS CARDS */
+        .margins-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .margin-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            background: var(--light-blue);
+        }
+        
+        .margin-card h4 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .margin-value {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+        
+        .margin-bruta { color: #2196F3; }
+        .margin-operacional { color: #4CAF50; }
+        .margin-liquida { color: #9C27B0; }
+        
+        /* FOOTER */
+        .footer-card {
+            grid-column: 1 / -1;
+            background: var(--primary-blue);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+        }
+        
+        /* MENSAGENS */
+        .message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            max-width: 400px;
+        }
+        
+        .message.success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .message.error {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .message.info {
+            background: var(--accent-blue);
+            color: white;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 1200px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+            
+            .control-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .margins-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sync-buttons {
+                flex-direction: column;
+            }
+        }
+        
+        /* LOADING */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 10001;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .loading.active {
+            display: flex;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid var(--light-blue);
+            border-top: 5px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* INSTRUÇÕES */
+        .instructions {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: var(--radius);
+            margin-top: 30px;
+            border-left: 4px solid var(--primary-blue);
+        }
+        
+        .instructions h3 {
+            color: var(--primary-blue);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .instructions ol {
+            padding-left: 20px;
+            color: #555;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- MODAL DE CONTROLE -->
+    <div class="control-modal" id="controlModal">
+        <div class="control-container">
+            <div class="control-tabs">
+                <button class="control-tab active" data-tab="upload">
+                    <i class="fas fa-file-upload"></i> IMPORTAR PLANILHA
+                </button>
+                <button class="control-tab" data-tab="sync">
+                    <i class="fas fa-sync"></i> SINCRONIZAR DADOS
+                </button>
+                <button class="control-tab" data-tab="manage">
+                    <i class="fas fa-cog"></i> GERENCIAR DADOS
+                </button>
+            </div>
+            
+            <!-- TAB: UPLOAD -->
+            <div class="tab-content active" id="uploadTab">
+                <h2 class="tab-title"><i class="fas fa-file-excel"></i> IMPORTAR PLANILHA</h2>
+                <p>Faça upload de uma planilha Excel (.xlsx, .xls) ou CSV para atualizar automaticamente a DRE.</p>
+                
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h3>Arraste e solte sua planilha aqui</h3>
+                    <p>ou clique para selecionar o arquivo</p>
+                    <p style="font-size: 14px; color: #666; margin-top: 10px;">
+                        Formatos suportados: Excel (.xlsx, .xls), CSV
+                    </p>
+                    <input type="file" id="fileInput" class="file-input" accept=".xlsx,.xls,.csv">
+                </div>
+                
+                <div class="instructions">
+                    <h3><i class="fas fa-info-circle"></i> INSTRUÇÕES:</h3>
+                    <ol>
+                        <li>Sua planilha deve ter as colunas: <strong>Descrição</strong> e <strong>Valor</strong></li>
+                        <li>As descrições devem corresponder aos itens da DRE (ex: "Receita Bruta", "Custos")</li>
+                        <li>Valores podem ser números simples (ex: 45000000 para 45 milhões)</li>
+                        <li>Após importar, os dados serão automaticamente atualizados</li>
+                    </ol>
+                </div>
+                
+                <div class="sync-buttons">
+                    <button class="btn btn-primary" onclick="closeControlModal()">
+                        <i class="fas fa-times"></i> FECHAR
+                    </button>
+                </div>
+            </div>
+            
+            <!-- TAB: SYNC -->
+            <div class="tab-content" id="syncTab">
+                <h2 class="tab-title"><i class="fas fa-link"></i> SINCRONIZAR DADOS</h2>
+                <p>Compartilhe este código com a diretoria para que eles vejam os dados atualizados em tempo real.</p>
+                
+                <div class="sync-section">
+                    <h3><i class="fas fa-key"></i> CÓDIGO DE SINCRONIZAÇÃO ATUAL</h3>
+                    <div class="sync-code" id="syncCodeDisplay">
+                        Gerando código...
+                    </div>
+                    <p style="font-size: 14px; color: #666; margin-top: 10px;">
+                        Este código contém todos os dados atuais da DRE. Compartilhe-o com a diretoria.
+                    </p>
+                </div>
+                
+                <div class="sync-buttons">
+                    <button class="btn btn-success" onclick="copySyncCode()">
+                        <i class="fas fa-copy"></i> COPIAR CÓDIGO
+                    </button>
+                    <button class="btn btn-primary" onclick="generateNewSyncCode()">
+                        <i class="fas fa-redo"></i> GERAR NOVO CÓDIGO
+                    </button>
+                </div>
+                
+                <div class="sync-section" style="margin-top: 30px;">
+                    <h3><i class="fas fa-download"></i> IMPORTAR CÓDIGO</h3>
+                    <p>Cole um código de sincronização recebido:</p>
+                    <textarea id="syncCodeInput" placeholder="Cole o código de sincronização aqui..." 
+                              style="width: 100%; padding: 15px; border: 2px solid var(--light-blue); border-radius: 8px; margin: 15px 0; font-family: monospace; min-height: 100px;"></textarea>
+                    <div class="sync-buttons">
+                        <button class="btn btn-warning" onclick="importSyncCode()">
+                            <i class="fas fa-file-import"></i> IMPORTAR DADOS
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TAB: MANAGE -->
+            <div class="tab-content" id="manageTab">
+                <h2 class="tab-title"><i class="fas fa-database"></i> GERENCIAR DADOS</h2>
+                
+                <div class="sync-buttons">
+                    <button class="btn btn-success" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel"></i> EXPORTAR PARA EXCEL
+                    </button>
+                    <button class="btn btn-primary" onclick="backupData()">
+                        <i class="fas fa-save"></i> SALVAR BACKUP LOCAL
+                    </button>
+                    <button class="btn btn-warning" onclick="loadBackup()">
+                        <i class="fas fa-history"></i> CARREGAR BACKUP
+                    </button>
+                </div>
+                
+                <div class="instructions" style="margin-top: 30px;">
+                    <h3><i class="fas fa-history"></i> HISTÓRICO DE ALTERAÇÕES</h3>
+                    <div id="changeHistory" style="max-height: 200px; overflow-y: auto; margin-top: 10px;">
+                        <!-- Histórico será gerado aqui -->
+                    </div>
+                </div>
+                
+                <div class="sync-buttons" style="margin-top: 30px;">
+                    <button class="btn btn-primary" onclick="closeControlModal()">
+                        <i class="fas fa-times"></i> FECHAR
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- LOADING -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+    </div>
+    
+    <!-- DASHBOARD -->
+    <div id="dashboard">
+        <div class="dashboard-container">
+            <!-- HEADER COM BOTÕES DE CONTROLE -->
+            <div class="card header-card">
+                <div class="header-content">
+                    <div class="header-text">
+                        <h1><i class="fas fa-chart-line"></i> DASHBOARD FINANCEIRO</h1>
+                        <p>Demonstração do Resultado do Exercício - Sistema Integrado</p>
+                    </div>
+                    <div class="control-buttons">
+                        <button class="control-btn" onclick="showControlModal()">
+                            <i class="fas fa-cogs"></i> CONTROLE DE DADOS
+                        </button>
+                        <button class="control-btn" onclick="shareDashboard()">
+                            <i class="fas fa-share-alt"></i> COMPARTILHAR
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- INFO CARDS -->
+            <div class="info-grid">
+                <div class="card info-card" id="receita-card">
+                    <div class="info-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <h3>Receita Líquida</h3>
+                    <div class="value" id="receita-liquida-value">R$ 39.400.000</div>
+                    <div class="subtitle" id="receita-variacao">+125% vs período anterior</div>
+                </div>
+                
+                <div class="card info-card" id="lucro-card">
+                    <div class="info-icon">
+                        <i class="fas fa-profit"></i>
+                    </div>
+                    <h3>Lucro Líquido</h3>
+                    <div class="value" id="lucro-liquido-value">R$ 39.035.000</div>
+                    <div class="subtitle" id="margem-liquida-text">Margem: 93,1%</div>
+                </div>
+                
+                <div class="card info-card" id="ebitda-card">
+                    <div class="info-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h3>EBIT</h3>
+                    <div class="value" id="ebit-value">R$ 39.050.000</div>
+                    <div class="subtitle" id="ebit-variacao">+5% crescimento</div>
+                </div>
+                
+                <div class="card info-card" id="margem-card">
+                    <div class="info-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <h3>Margem Bruta</h3>
+                    <div class="value" id="margem-bruta-value">99,5%</div>
+                    <div class="subtitle">Alta eficiência</div>
+                </div>
+            </div>
+            
+            <!-- DRE TABLE -->
+            <div class="card dre-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-edit"></i> DRE EDITÁVEL (Clique nos valores)</h2>
+                    <div class="period-selector">
+                        <button class="period-btn active" data-period="mensal">Mensal</button>
+                        <button class="period-btn" data-period="trimestral">Trimestral</button>
+                        <button class="period-btn" data-period="anual">Anual</button>
+                    </div>
+                </div>
+                
+                <table class="dre-table">
+                    <tbody>
+                        <!-- RECEITAS -->
+                        <tr class="category">
+                            <td>RECEITA BRUTA DE VENDAS</td>
+                            <td class="value-cell">
+                                <span class="editable-value" data-id="receita_bruta">R$ 45.000.000,00</span>
+                            </td>
+                        </tr>
+                        <tr class="subcategory">
+                            <td>(-) Deduções da Receita Bruta</td>
+                            <td class="value-cell">
+                                <span class="editable-value" data-id="deducoes">R$ 5.600.000,00</span>
+                            </td>
+                        </tr>
+                        <tr class="total-line">
+                            <td><strong>= RECEITA LÍQUIDA (Calculado)</strong></td>
+                            <td class="value-cell">
+                                <span class="calculated-value" id="receita_liquida">R$ 39.400.000,00</span>
+                            </td>
+                        </tr>
+                        
+                        <!-- CUSTOS -->
+                        <tr class="category">
+                            <td>CUSTO DOS PRODUTOS VENDIDOS</td>
+                            <td class="value-cell">
+                                <span class="editable-value" data-id="custos">R$ 200.000,00</span>
+                            </td>
+                        </tr>
+                        <tr class="total-line">
+                            <td><strong>= LUCRO BRUTO (Calculado)</strong></td>
+                            <td class="value-cell">
+                                <span class="calculated-value positive" id="lucro_bruto">R$ 39.200.000,00</span>
+                            </td>
+                        </tr>
+                        
+                        <!-- DESPESAS -->
+                        <tr class="category">
+                            <td>DESPESAS OPERACIONAIS</td>
+                            <td class="value-cell">
+                                <span class="calculated-value" id="total_despesas">R$ 150.000,00</span>
+                            </td>
+                        </tr>
+                        <tr class="subcategory">
+                            <td>Despesas Administrativas</td>
+                            <td class="value-cell">
+                                <span class="editable-value" data-id="despesas_adm">R$ 60.000,00</span>
+                            </td>
+                        </tr>
+                        <tr class="subcategory">
+                            <td>Despesas Comerciais</td>
+                            <td class="value-cell">
+                                <span class="editable-value" data-id="despesas_comerciais">R$ 50.000,00</span>
+                            </td>
+                        </tr>
+                        <tr class="subcategory">
+                            <td>Despesas de Marketing</td>
+                            <td class="value-cell">
+                                <span class="editable-value" data-id="despesas_mkt">R$ 30.000,00</span>
+                            </td>
+                        </tr>
+                        <tr class="subcategory">
+                            <td>Despesas Financeiras</td>
+                            <td class="value-cell">
+                                <span class="editable-value" data-id="despesas_fin">R$ 10.000,00</span>
+                            </td>
+                        </tr>
+                        <tr class="total-line">
+                            <td><strong>= LUCRO OPERACIONAL - EBIT (Calculado)</strong></td>
+                            <td class="value-cell">
+                                <span class="calculated-value positive" id="lucro_operacional">R$ 39.050.000,00</span>
+                            </td>
+                        </tr>
+                        
+                        <!-- OUTROS -->
+                        <tr class="category">
+                            <td>(+) Resultado Não Operacional</td>
+                            <td class="value-cell">
+                                <span class="editable-value" data-id="resultado_nao_op">R$ 5.000,00</span>
+                            </td>
+                        </tr>
+                        <tr class="category">
+                            <td>(-) Provisão para Impostos</td>
+                            <td class="value-cell">
+                                <span class="editable-value" data-id="impostos">R$ 20.000,00</span>
+                            </td>
+                        </tr>
+                        
+                        <!-- RESULTADO FINAL -->
+                        <tr class="final-result">
+                            <td><strong>= LUCRO LÍQUIDO DO EXERCÍCIO (Calculado)</strong></td>
+                            <td class="value-cell">
+                                <span class="calculated-value" id="lucro_liquido">R$ 39.035.000,00</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- CHARTS -->
+            <div class="charts-container">
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-pie"></i> COMPOSIÇÃO DE DESPESAS</h2>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="expensesChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card chart-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-bar"></i> DISTRIBUIÇÃO DO LUCRO</h2>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="profitChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- MARGENS -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-percent"></i> MARGENS DE LUCRO</h2>
+                    </div>
+                    <div class="margins-container">
+                        <div class="margin-card">
+                            <h4>MARGEM BRUTA</h4>
+                            <div class="margin-value margin-bruta" id="margem-bruta">99,5%</div>
+                            <p>Lucro Bruto / Receita Líquida</p>
+                        </div>
+                        <div class="margin-card">
+                            <h4>MARGEM OPERACIONAL</h4>
+                            <div class="margin-value margin-operacional" id="margem-operacional">99,1%</div>
+                            <p>EBIT / Receita Líquida</p>
+                        </div>
+                        <div class="margin-card">
+                            <h4>MARGEM LÍQUIDA</h4>
+                            <div class="margin-value margin-liquida" id="margem-liquida">93,1%</div>
+                            <p>Lucro Líquido / Receita Líquida</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FOOTER -->
+            <div class="footer-card">
+                <p><i class="fas fa-sync-alt"></i> Sistema sincronizado | Atualizado em: <span id="currentDate"></span></p>
+                <p style="opacity: 0.8; margin-top: 5px;">Dados compartilháveis via código de sincronização</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== SISTEMA PRINCIPAL ====================
+        let dreData = {
+            receita_bruta: 45000000,
+            deducoes: 5600000,
+            custos: 200000,
+            despesas_adm: 60000,
+            despesas_comerciais: 50000,
+            despesas_mkt: 30000,
+            despesas_fin: 10000,
+            resultado_nao_op: 5000,
+            impostos: 20000,
+            lastUpdated: new Date().toISOString(),
+            version: 1
+        };
+        
+        let expensesChart, profitChart;
+        let changeHistory = [];
+        
+        // ==================== INICIALIZAÇÃO ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Carregar dados salvos
+            loadSavedData();
+            
+            // Data atual
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('pt-BR');
+            
+            // Configurar eventos
+            setupEventListeners();
+            
+            // Inicializar dashboard
+            initializeDashboard();
+            
+            // Configurar upload de arquivo
+            setupFileUpload();
+            
+            // Inicializar histórico
+            loadChangeHistory();
+        });
+        
+        // ==================== CONTROLE DE DADOS ====================
+        function showControlModal() {
+            document.getElementById('controlModal').style.display = 'flex';
+            generateSyncCode();
+            updateChangeHistoryDisplay();
+        }
+        
+        function closeControlModal() {
+            document.getElementById('controlModal').style.display = 'none';
+        }
+        
+        function switchTab(tabId) {
+            // Esconder todas as tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remover active de todos os botões
+            document.querySelectorAll('.control-tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Mostrar tab selecionada
+            document.getElementById(tabId + 'Tab').classList.add('active');
+            
+            // Ativar botão correspondente
+            document.querySelector(`.control-tab[data-tab="${tabId}"]`).classList.add('active');
+        }
+        
+        // Configurar tabs
+        document.querySelectorAll('.control-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabId = this.getAttribute('data-tab');
+                switchTab(tabId);
+            });
+        });
+        
+        // ==================== IMPORTAR PLANILHA ====================
+        function setupFileUpload() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            
+            uploadArea.addEventListener('click', () => fileInput.click());
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.background = '#e0edff';
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.background = '';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.background = '';
+                
+                if (e.dataTransfer.files.length) {
+                    handleFileUpload(e.dataTransfer.files[0]);
+                }
+            });
+            
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length) {
+                    handleFileUpload(e.target.files[0]);
+                }
+            });
+        }
+        
+        function handleFileUpload(file) {
+            showLoading();
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const data = e.target.result;
+                    const workbook = XLSX.read(data, { type: 'binary' });
+                    
+                    // Pegar primeira planilha
+                    const firstSheet = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheet];
+                    
+                    // Converter para JSON
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    
+                    // Processar dados
+                    processSpreadsheetData(jsonData);
+                    
+                    showMessage('Planilha importada com sucesso!', 'success');
+                } catch (error) {
+                    console.error('Erro ao processar arquivo:', error);
+                    showMessage('Erro ao processar arquivo. Verifique o formato.', 'error');
+                } finally {
+                    hideLoading();
+                }
+            };
+            
+            reader.onerror = function() {
+                showMessage('Erro ao ler arquivo.', 'error');
+                hideLoading();
+            };
+            
+            reader.readAsBinaryString(file);
+        }
+        
+        function processSpreadsheetData(jsonData) {
+            // Mapeamento de termos da planilha para IDs do sistema
+            const mapping = {
+                'Receita Bruta': 'receita_bruta',
+                'Receita Bruta de Vendas': 'receita_bruta',
+                'Deduções': 'deducoes',
+                'Deduções da Receita Bruta': 'deducoes',
+                'Custo dos Produtos Vendidos': 'custos',
+                'CPV': 'custos',
+                'Despesas Administrativas': 'despesas_adm',
+                'Despesas Comerciais': 'despesas_comerciais',
+                'Despesas de Marketing': 'despesas_mkt',
+                'Marketing': 'despesas_mkt',
+                'Despesas Financeiras': 'despesas_fin',
+                'Resultado Não Operacional': 'resultado_nao_op',
+                'Impostos': 'impostos',
+                'Provisão para Impostos': 'impostos'
+            };
+            
+            let updatedCount = 0;
+            
+            jsonData.forEach(row => {
+                const descricao = row.Descrição || row.descricao || row.Item || row.item;
+                const valor = row.Valor || row.valor || row.Valor_R$ || row.valor_rs;
+                
+                if (descricao && valor !== undefined) {
+                    const descLower = descricao.toString().toLowerCase();
+                    
+                    // Encontrar correspondência
+                    for (const [key, id] of Object.entries(mapping)) {
+                        if (descLower.includes(key.toLowerCase())) {
+                            const numValue = parseFloat(valor.toString().replace(/[^\d.,-]/g, '').replace(',', '.'));
+                            
+                            if (!isNaN(numValue)) {
+                                dreData[id] = numValue;
+                                updatedCount++;
+                                
+                                // Registrar no histórico
+                                addToHistory(`Importado de planilha: ${descricao} = R$ ${formatarMoedaCompleta(numValue)}`);
+                                break;
+                            }
+                        }
+                    }
+                }
+            });
+            
+            if (updatedCount > 0) {
+                dreData.lastUpdated = new Date().toISOString();
+                saveData();
+                updateDashboard();
+                showMessage(`${updatedCount} valores atualizados da planilha!`, 'success');
+            } else {
+                showMessage('Nenhum dado compatível encontrado na planilha.', 'warning');
+            }
+        }
+        
+        // ==================== SISTEMA DE SINCRONIZAÇÃO ====================
+        function generateSyncCode() {
+            const syncData = {
+                data: dreData,
+                timestamp: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            const jsonString = JSON.stringify(syncData);
+            const syncCode = btoa(unescape(encodeURIComponent(jsonString)));
+            
+            document.getElementById('syncCodeDisplay').textContent = syncCode;
+            return syncCode;
+        }
+        
+        function copySyncCode() {
+            const syncCode = generateSyncCode();
+            navigator.clipboard.writeText(syncCode).then(() => {
+                showMessage('Código copiado para a área de transferência!', 'success');
+            });
+        }
+        
+        function generateNewSyncCode() {
+            generateSyncCode();
+            showMessage('Novo código gerado com sucesso!', 'success');
+        }
+        
+        function importSyncCode() {
+            const syncCode = document.getElementById('syncCodeInput').value.trim();
+            
+            if (!syncCode) {
+                showMessage('Por favor, cole um código de sincronização.', 'error');
+                return;
+            }
+            
+            try {
+                const jsonString = decodeURIComponent(escape(atob(syncCode)));
+                const syncData = JSON.parse(jsonString);
+                
+                // Atualizar dados
+                dreData = { ...dreData, ...syncData.data };
+                dreData.lastUpdated = new Date().toISOString();
+                
+                // Salvar e atualizar
+                saveData();
+                updateDashboard();
+                
+                // Registrar no histórico
+                addToHistory('Dados sincronizados via código externo');
+                
+                showMessage('Dados importados com sucesso!', 'success');
+                document.getElementById('syncCodeInput').value = '';
+                
+            } catch (error) {
+                console.error('Erro ao importar código:', error);
+                showMessage('Código inválido ou corrompido.', 'error');
+            }
+        }
+        
+        // ==================== GERENCIAMENTO DE DADOS ====================
+        function exportToExcel() {
+            showLoading();
+            
+            try {
+                // Criar dados para exportação
+                const exportData = [
+                    ['ITEM', 'VALOR (R$)'],
+                    ['Receita Bruta de Vendas', dreData.receita_bruta],
+                    ['(-) Deduções da Receita Bruta', dreData.deducoes],
+                    ['Receita Líquida', dreData.receita_bruta - dreData.deducoes],
+                    ['Custo dos Produtos Vendidos', dreData.custos],
+                    ['Lucro Bruto', (dreData.receita_bruta - dreData.deducoes) - dreData.custos],
+                    ['Despesas Administrativas', dreData.despesas_adm],
+                    ['Despesas Comerciais', dreData.despesas_comerciais],
+                    ['Despesas de Marketing', dreData.despesas_mkt],
+                    ['Despesas Financeiras', dreData.despesas_fin],
+                    ['Lucro Operacional (EBIT)', calcularValores().lucro_operacional],
+                    ['(+) Resultado Não Operacional', dreData.resultado_nao_op],
+                    ['(-) Provisão para Impostos', dreData.impostos],
+                    ['Lucro Líquido', calcularValores().lucro_liquido]
+                ];
+                
+                // Criar worksheet
+                const ws = XLSX.utils.aoa_to_sheet(exportData);
+                
+                // Criar workbook
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "DRE");
+                
+                // Gerar arquivo
+                const fileName = `DRE_Export_${new Date().toISOString().slice(0,10)}.xlsx`;
+                XLSX.writeFile(wb, fileName);
+                
+                addToHistory('Exportado para Excel');
+                showMessage('Dados exportados com sucesso!', 'success');
+                
+            } catch (error) {
+                console.error('Erro ao exportar:', error);
+                showMessage('Erro ao exportar dados.', 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        function backupData() {
+            const backup = {
+                dreData: dreData,
+                history: changeHistory,
+                timestamp: new Date().toISOString()
+            };
+            
+            localStorage.setItem('dreBackup', JSON.stringify(backup));
+            addToHistory('Backup salvo localmente');
+            showMessage('Backup salvo com sucesso!', 'success');
+        }
+        
+        function loadBackup() {
+            const backupStr = localStorage.getItem('dreBackup');
+            
+            if (!backupStr) {
+                showMessage('Nenhum backup encontrado.', 'error');
+                return;
+            }
+            
+            if (confirm('Carregar backup? Isso substituirá os dados atuais.')) {
+                try {
+                    const backup = JSON.parse(backupStr);
+                    dreData = backup.dreData;
+                    changeHistory = backup.history || [];
+                    
+                    saveData();
+                    updateDashboard();
+                    updateChangeHistoryDisplay();
+                    
+                    addToHistory('Backup restaurado');
+                    showMessage('Backup carregado com sucesso!', 'success');
+                } catch (error) {
+                    showMessage('Erro ao carregar backup.', 'error');
+                }
+            }
+        }
+        
+        // ==================== HISTÓRICO ====================
+        function addToHistory(action) {
+            changeHistory.unshift({
+                action: action,
+                timestamp: new Date().toISOString(),
+                user: 'Sistema'
+            });
+            
+            // Manter apenas últimos 50 itens
+            if (changeHistory.length > 50) {
+                changeHistory.pop();
+            }
+            
+            saveHistory();
+            updateChangeHistoryDisplay();
+        }
+        
+        function saveHistory() {
+            localStorage.setItem('dreHistory', JSON.stringify(changeHistory));
+        }
+        
+        function loadChangeHistory() {
+            const savedHistory = localStorage.getItem('dreHistory');
+            if (savedHistory) {
+                changeHistory = JSON.parse(savedHistory);
+            }
+        }
+        
+        function updateChangeHistoryDisplay() {
+            const container = document.getElementById('changeHistory');
+            container.innerHTML = '';
+            
+            changeHistory.slice(0, 10).forEach(item => {
+                const div = document.createElement('div');
+                div.style.cssText = 'padding: 8px; border-bottom: 1px solid #eee; font-size: 12px;';
+                div.innerHTML = `
+                    <div style="color: #666;">${new Date(item.timestamp).toLocaleString('pt-BR')}</div>
+                    <div style="color: #333; font-weight: 500;">${item.action}</div>
+                `;
+                container.appendChild(div);
+            });
+            
+            if (changeHistory.length === 0) {
+                container.innerHTML = '<div style="color: #999; text-align: center; padding: 20px;">Nenhuma alteração registrada</div>';
+            }
+        }
+        
+        // ==================== DASHBOARD FUNCTIONS ====================
+        function setupEventListeners() {
+            // Edição de valores
+            document.querySelectorAll('.editable-value').forEach(el => {
+                el.addEventListener('click', function() {
+                    iniciarEdicao(this);
+                });
+            });
+            
+            // Botões de período
+            document.querySelectorAll('.period-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Fechar modal ao clicar fora
+            document.getElementById('controlModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeControlModal();
+                }
+            });
+        }
+        
+        function initializeDashboard() {
+            updateDashboard();
+            initializeCharts();
+        }
+        
+        function calcularValores() {
+            const receita_liquida = dreData.receita_bruta - dreData.deducoes;
+            const lucro_bruto = receita_liquida - dreData.custos;
+            const total_despesas = dreData.despesas_adm + dreData.despesas_comerciais + dreData.despesas_mkt + dreData.despesas_fin;
+            const lucro_operacional = lucro_bruto - total_despesas;
+            const lucro_antes_impostos = lucro_operacional + dreData.resultado_nao_op;
+            const lucro_liquido = lucro_antes_impostos - dreData.impostos;
+            
+            const margem_bruta = receita_liquida > 0 ? (lucro_bruto / receita_liquida * 100) : 0;
+            const margem_operacional = receita_liquida > 0 ? (lucro_operacional / receita_liquida * 100) : 0;
+            const margem_liquida = receita_liquida > 0 ? (lucro_liquido / receita_liquida * 100) : 0;
+            
+            return {
+                receita_liquida,
+                lucro_bruto,
+                total_despesas,
+                lucro_operacional,
+                lucro_liquido,
+                margem_bruta,
+                margem_operacional,
+                margem_liquida
+            };
+        }
+        
+        function updateDashboard() {
+            const calculos = calcularValores();
+            
+            // Atualizar valores na tabela
+            document.querySelectorAll('[data-id]').forEach(el => {
+                const id = el.getAttribute('data-id');
+                if (dreData[id] !== undefined) {
+                    el.textContent = formatarMoedaCompleta(dreData[id]);
+                }
+            });
+            
+            // Atualizar valores calculados
+            document.getElementById('receita_liquida').textContent = formatarMoedaCompleta(calculos.receita_liquida);
+            document.getElementById('lucro_bruto').textContent = formatarMoedaCompleta(calculos.lucro_bruto);
+            document.getElementById('total_despesas').textContent = formatarMoedaCompleta(calculos.total_despesas);
+            document.getElementById('lucro_operacional').textContent = formatarMoedaCompleta(calculos.lucro_operacional);
+            document.getElementById('lucro_liquido').textContent = formatarMoedaCompleta(calculos.lucro_liquido);
+            
+            // Atualizar cards
+            document.getElementById('receita-liquida-value').textContent = formatarMoeda(calculos.receita_liquida);
+            document.getElementById('lucro-liquido-value').textContent = formatarMoeda(calculos.lucro_liquido);
+            document.getElementById('ebit-value').textContent = formatarMoeda(calculos.lucro_operacional);
+            
+            // Atualizar margens
+            document.getElementById('margem-bruta').textContent = formatarPercentual(calculos.margem_bruta);
+            document.getElementById('margem-bruta-value').textContent = formatarPercentual(calculos.margem_bruta);
+            document.getElementById('margem-operacional').textContent = formatarPercentual(calculos.margem_operacional);
+            document.getElementById('margem-liquida').textContent = formatarPercentual(calculos.margem_liquida);
+            document.getElementById('margem-liquida-text').textContent = `Margem: ${formatarPercentual(calculos.margem_liquida)}`;
+            
+            // Atualizar gráficos
+            updateCharts(calculos);
+        }
+        
+        function iniciarEdicao(elemento) {
+            const valorAtual = elemento.textContent;
+            const valorNumerico = parseFloat(valorAtual.replace(/[^\d,-]/g, '').replace(',', '.'));
+            const id = elemento.getAttribute('data-id');
+            const descricao = elemento.closest('tr').querySelector('td').textContent;
+            
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'value-input';
+            input.value = isNaN(valorNumerico) ? '0' : valorNumerico;
+            input.style.width = '180px';
+            
+            elemento.parentNode.replaceChild(input, elemento);
+            input.focus();
+            input.select();
+            
+            const finalizar = function() {
+                const novoValor = parseFloat(input.value.replace(',', '.'));
+                
+                if (!isNaN(novoValor)) {
+                    const valorAntigo = dreData[id];
+                    dreData[id] = novoValor;
+                    
+                    // Recriar elemento
+                    const novoElemento = document.createElement('span');
+                    novoElemento.className = 'editable-value';
+                    novoElemento.setAttribute('data-id', id);
+                    novoElemento.textContent = formatarMoedaCompleta(novoValor);
+                    novoElemento.addEventListener('click', function() {
+                        iniciarEdicao(this);
+                    });
+                    
+                    input.parentNode.replaceChild(novoElemento, input);
+                    
+                    // Atualizar sistema
+                    dreData.lastUpdated = new Date().toISOString();
+                    saveData();
+                    updateDashboard();
+                    
+                    // Registrar no histórico
+                    addToHistory(`Editado: ${descricao} de R$ ${formatarMoedaCompleta(valorAntigo)} para R$ ${formatarMoedaCompleta(novoValor)}`);
+                    
+                    showMessage('Valor atualizado!', 'success');
+                } else {
+                    showMessage('Valor inválido!', 'error');
+                    input.focus();
+                }
+            };
+            
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') finalizar();
+            });
+            
+            input.addEventListener('blur', finalizar);
+        }
+        
+        // ==================== GRÁFICOS ====================
+        function initializeCharts() {
+            const calculos = calcularValores();
+            
+            // Gráfico de Despesas
+            const expensesCtx = document.getElementById('expensesChart').getContext('2d');
+            expensesChart = new Chart(expensesCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Administrativas', 'Comerciais', 'Marketing', 'Financeiras'],
+                    datasets: [{
+                        data: [
+                            dreData.despesas_adm,
+                            dreData.despesas_comerciais,
+                            dreData.despesas_mkt,
+                            dreData.despesas_fin
+                        ],
+                        backgroundColor: ['#005795', '#0078c8', '#4a9ce8', '#89c2f0']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' }
+                    }
+                }
+            });
+            
+            // Gráfico de Distribuição
+            const profitCtx = document.getElementById('profitChart').getContext('2d');
+            profitChart = new Chart(profitCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Receita Líquida', 'Lucro Bruto', 'Lucro Operacional', 'Lucro Líquido'],
+                    datasets: [{
+                        data: [
+                            calculos.receita_liquida,
+                            calculos.lucro_bruto,
+                            calculos.lucro_operacional,
+                            calculos.lucro_liquido
+                        ],
+                        backgroundColor: ['#005795', '#00a86b', '#4a9ce8', '#9C27B0']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    if (value >= 1000000) return 'R$ ' + (value/1000000).toFixed(1) + 'M';
+                                    if (value >= 1000) return 'R$ ' + (value/1000).toFixed(0) + 'k';
+                                    return 'R$ ' + value;
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+        
+        function updateCharts(calculos) {
+            if (expensesChart) {
+                expensesChart.data.datasets[0].data = [
+                    dreData.despesas_adm,
+                    dreData.despesas_comerciais,
+                    dreData.despesas_mkt,
+                    dreData.despesas_fin
+                ];
+                expensesChart.update();
+            }
+            
+            if (profitChart) {
+                profitChart.data.datasets[0].data = [
+                    calculos.receita_liquida,
+                    calculos.lucro_bruto,
+                    calculos.lucro_operacional,
+                    calculos.lucro_liquido
+                ];
+                profitChart.update();
+            }
+        }
+        
+        // ==================== UTILITÁRIOS ====================
+        function formatarMoeda(valor) {
+            if (valor >= 1000000) {
+                return 'R$ ' + (valor / 1000000).toLocaleString('pt-BR', { minimumFractionDigits: 3, maximumFractionDigits: 3 }) + ' M';
+            } else if (valor >= 1000) {
+                return 'R$ ' + (valor / 1000).toLocaleString('pt-BR', { minimumFractionDigits: 3, maximumFractionDigits: 3 }) + ' mil';
+            } else {
+                return 'R$ ' + valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+        }
+        
+        function formatarMoedaCompleta(valor) {
+            return 'R$ ' + valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        
+        function formatarPercentual(valor) {
+            return valor.toFixed(1).replace('.', ',') + '%';
+        }
+        
+        function saveData() {
+            localStorage.setItem('dreData', JSON.stringify(dreData));
+        }
+        
+        function loadSavedData() {
+            const savedData = localStorage.getItem('dreData');
+            if (savedData) {
+                dreData = JSON.parse(savedData);
+            }
+        }
+        
+        function showLoading() {
+            document.getElementById('loading').classList.add('active');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('active');
+        }
+        
+        function showMessage(text, type) {
+            const message = document.createElement('div');
+            message.className = `message ${type}`;
+            message.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${text}</span>
+            `;
+            
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                message.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => message.remove(), 300);
+            }, 3000);
+        }
+        
+        function shareDashboard() {
+            const url = window.location.href;
+            navigator.clipboard.writeText(url).then(() => {
+                showMessage('Link copiado! Compartilhe este link com a diretoria.', 'success');
+            });
+        }
+    </script>
+</body>
+</html>
