@@ -907,13 +907,13 @@
                         <tr class="subcategory">
                             <td>Despesas Pessoal</td>
                             <td class="value-cell">
-                                <span class="editable-value" data-id="despesas_comerciais">R$ 50.000,00</span>
+                                <span class="editable-value" data-id="despesas_pessoal">R$ 50.000,00</span>
                             </td>
                         </tr>
                         <tr class="subcategory">
                             <td>Outras Despesas</td>
                             <td class="value-cell">
-                                <span class="editable-value" data-id="despesas_mkt">R$ 30.000,00</span>
+                                <span class="editable-value" data-id="outras_despesas">R$ 30.000,00</span>
                             </td>
                         </tr>
                         <tr class="subcategory">
@@ -1613,8 +1613,8 @@
             if (expensesChart) {
                 expensesChart.data.datasets[0].data = [
                     dreData.despesas_adm,
-                    dreData.despesas_comerciais,
-                    dreData.despesas_mkt,
+                    dreData.despesas_pessoal,
+                    dreData.outras_despesas,
                     dreData.despesas_fin
                 ];
                 expensesChart.update();
