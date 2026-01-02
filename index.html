@@ -1551,12 +1551,12 @@
             expensesChart = new Chart(expensesCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Administrativas', 'Comerciais', 'Marketing', 'Financeiras'],
+                    labels: ['Administrativas', 'Pessoal', 'Outras Despesas', 'Financeiras'],
                     datasets: [{
                         data: [
                             dreData.despesas_adm,
-                            dreData.despesas_comerciais,
-                            dreData.despesas_mkt,
+                            dreData.despesas_pessoal,
+                            dreData.outras_despesas,
                             dreData.despesas_fin
                         ],
                         backgroundColor: ['#005795', '#0078c8', '#4a9ce8', '#89c2f0']
